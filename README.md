@@ -18,9 +18,9 @@ Sonora uses the system WebView and a Rust audio engine. Incremental scans, a SQL
 
 ![The full Sonora Now Playing window with album artwork, synchronized lyrics, and playback controls](docs/screenshots/now-playing.png)
 
-![Sonora’s library with search, a track list, and playback controls](docs/screenshots/library.png)
+![Sonora browsing local music in the library, with track, artist, and album columns](docs/screenshots/sonora-library.png)
 
-The menu bar and Now Playing screenshots show the same track playing in Sonora on macOS. The library screenshot uses demo data. The app interface is currently in Simplified Chinese.
+The screenshots were captured in Sonora on macOS. The menu bar and Now Playing window show the same track. The app interface is currently in Simplified Chinese.
 
 ## Install
 
