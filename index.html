@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sonora</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // apply saved appearance before first paint to avoid a light flash
+      try {
+        var t =
+          localStorage.getItem("sonora.theme") ||
+          localStorage.getItem("ownmusic.theme") ||
+          "auto";
+        if (
+          t === "dark" ||
+          (t !== "light" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches)
+        ) {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (e) {}
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

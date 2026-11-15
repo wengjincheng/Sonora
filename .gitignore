@@ -1,0 +1,28 @@
+# Dependencies and build outputs
+node_modules/
+/.pnpm-store/
+/dist/
+/src-tauri/target/
+/src-tauri/gen/
+/src-tauri/icons/Square*Logo.png
+/src-tauri/icons/StoreLogo.png
+/release/
+
+# Local development notes, backups and diagnostics
+/.local-backups/
+/jincheng-dev/
+/DESIGN.md
+/tests/artifacts/
+/src-tauri/src/diag_tests.rs
+
+# Environment, editor and temporary files
+.DS_Store
+*.local
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.log
+*.tmp
+/tmp/

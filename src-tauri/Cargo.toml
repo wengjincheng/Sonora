@@ -1,0 +1,37 @@
+[package]
+name = "sonora"
+version = "0.1.0"
+description = "A lightweight local music player with menubar lyrics"
+license = "MIT"
+edition = "2021"
+
+[lib]
+name = "sonora_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png", "image-ico", "protocol-asset"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-autostart = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rusqlite = { version = "0.32", features = ["bundled"] }
+walkdir = "2"
+lofty = "0.22"
+# 0.21: Decoder::try_from(File) sets byte_len + seekable from metadata —
+# required for symphonia FLAC/MP3 seek (rodio 0.20 hardcodes byte_len=None)
+rodio = { version = "0.21", default-features = false, features = ["playback", "symphonia-all", "symphonia-alac", "symphonia-aiff"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+tokio = { version = "1", features = ["sync", "time", "rt"] }
+souvlaki = "0.8"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+rand = "0.8"
+window-vibrancy = "0.5"
+quick-xml = "0.36"
+
+[profile.release]
+lto = true
+strip = true
