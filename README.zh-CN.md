@@ -12,13 +12,15 @@ Sonora 使用 macOS 自带的 WebView 和 Rust 音频引擎。曲库以 SQLite �
 
 ## 界面截图
 
-![Sonora 在 macOS 状态栏显示当前播放的歌词](docs/screenshots/menu-bar-lyrics.png)
+![完整的 macOS 菜单栏，右侧的 Sonora 正在显示同步歌词](docs/screenshots/menu-bar-lyrics.png)
 
-![Sonora 正在播放页，展示专辑封面、同步歌词和字号控制](docs/screenshots/now-playing.png)
+[查看原尺寸菜单栏](docs/screenshots/menu-bar-lyrics.png?raw=true)
+
+![Sonora 完整的正在播放窗口，展示专辑封面、同步歌词和播放控制](docs/screenshots/now-playing.png)
 
 ![Sonora 曲库，展示歌曲列表、搜索和底部播放控制](docs/screenshots/library.png)
 
-状态栏截图采自 Sonora 在 macOS 上的实际播放。曲库和正在播放页使用虚构曲库与示例歌词。
+状态栏和正在播放窗口均采自 Sonora 实际播放周杰伦的《告白气球》。曲库截图使用示例数据。
 
 ## 安装
 
