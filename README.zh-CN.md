@@ -24,7 +24,7 @@ Sonora 使用 macOS 自带的 WebView 和 Rust 音频引擎。曲库以 SQLite �
 
 ## 安装
 
-1. 从 [GitHub Releases](https://github.com/wengjincheng/Sonora/releases/latest) 下载 `Sonora_0.1.0_aarch64.dmg`。首发安装包适用于 Apple Silicon（M 系列）Mac。
+1. 从 [GitHub Releases](https://github.com/wengjincheng/Sonora/releases/latest) 下载 `Sonora_0.1.1_aarch64.dmg`。首发安装包适用于 Apple Silicon（M 系列）Mac。
 2. 打开 DMG，将 Sonora 拖到「应用程序」，再从那里启动。
 3. 安装包使用临时签名（ad hoc）。如果首次打开时 macOS 拦截了应用，确认安装包来自本仓库后，前往「系统设置 → 隐私与安全性」选择「仍要打开」。[Apple 安装说明](https://support.apple.com/zh-cn/102445)
 
@@ -42,7 +42,7 @@ Sonora 使用 macOS 自带的 WebView 和 Rust 音频引擎。曲库以 SQLite �
 | --- | --- |
 | 本地音频 | MP3、FLAC、WAV、M4A / MP4（AAC、ALAC）、OGG / OGA（Vorbis）、AIFF / AIF。音频在本机解码，断网时也能播放。 |
 | 曲库 | 扫描文件夹、读取文件标签和内嵌封面、按专辑浏览、按曲名 / 艺人 / 专辑搜索。 |
-| 播放 | 顺序、随机、列表循环、单曲循环。保存上次的曲目、队列、播放模式和音量。 |
+| 播放 | 顺序、随机、列表循环、单曲循环。随机模式每轮重新洗牌，并避免上一轮末曲紧接成为下一轮首曲。播放页和底部播放条显示源文件位深（格式支持时）和采样率。保存上次的曲目、队列、播放模式和音量。 |
 | 同步歌词 | 优先同名 LRC，其次本地缓存。在线匹配支持 [AMLL TTML 逐字歌词](https://github.com/amll-dev/amll-ttml-db)、网易云音乐、QQ 音乐和 [LRCLIB](https://lrclib.net/)。主窗口歌词字号可调至 80%–300%。 |
 | 封面与编辑 | 读取内嵌封面，缺失时通过 QQ 音乐、网易云音乐或酷狗音乐补全。支持手动重新匹配歌词和封面，以及为指定歌曲保存单独封面。 |
 | macOS 集成 | 状态栏滚动歌词、迷你播放器、系统媒体键和控制中心、仅菜单栏模式、登录自启。 |

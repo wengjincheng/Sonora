@@ -24,7 +24,7 @@ The screenshots were captured in Sonora on macOS. The menu bar and Now Playing w
 
 ## Install
 
-1. Download `Sonora_0.1.0_aarch64.dmg` from [GitHub Releases](https://github.com/wengjincheng/Sonora/releases/latest). The first installer is for Apple Silicon Macs.
+1. Download `Sonora_0.1.1_aarch64.dmg` from [GitHub Releases](https://github.com/wengjincheng/Sonora/releases/latest). The first installer is for Apple Silicon Macs.
 2. Open the disk image, drag Sonora to **Applications**, then launch it from there.
 3. The installer contains an ad hoc-signed app. If macOS blocks the first launch, verify that you downloaded the DMG from this repository and select **Open Anyway** in **System Settings → Privacy & Security**. [Apple’s instructions](https://support.apple.com/en-us/102445)
 
@@ -42,7 +42,7 @@ The screenshots were captured in Sonora on macOS. The menu bar and Now Playing w
 | --- | --- |
 | Local audio | MP3, FLAC, WAV, M4A / MP4 (AAC and ALAC), OGG / OGA (Vorbis), and AIFF / AIF. Audio is decoded on-device and plays offline. |
 | Library | Recursive folder import, incremental rescans, tag reading, album browsing, and search by title, artist, or album. |
-| Playback | Sequential play, shuffle, repeat all, and repeat one. Sonora restores the last track, queue, playback mode, and volume. |
+| Playback | Sequential play, shuffle, repeat all, and repeat one. Shuffle reshuffles each round without immediate repetition across its boundary. Now Playing and the player bar show source bit depth (when defined) and sample rate. Sonora restores the last track, queue, playback mode, and volume. |
 | Synchronized lyrics | Same-name LRC files take priority, followed by cached lyrics. Online lookups can use AMLL word-synced TTML, NetEase Cloud Music, QQ Music, and LRCLIB. Now Playing lyrics scale from 80% to 300%. |
 | Artwork and editing | Reads embedded art and fills in missing album artwork via QQ Music, NetEase Cloud Music, or KuGou. Edit track details, retry lyric and artwork matches, or fetch independent artwork for a single track. |
 | macOS integration | Scrolling menu bar lyrics, mini player, media keys, Control Center, menu bar-only mode, and launch at login. |

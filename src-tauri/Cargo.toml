@@ -1,6 +1,6 @@
 [package]
 name = "sonora"
-version = "0.1.0"
+version = "0.1.1"
 description = "A lightweight local music player with menubar lyrics"
 license = "MIT"
 edition = "2021"

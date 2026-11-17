@@ -14,7 +14,9 @@ use std::sync::mpsc::Receiver;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+use lofty::file::AudioFile;
 use rand::seq::SliceRandom;
+use rand::Rng;
 use rodio::mixer::Mixer;
 use rodio::source::SeekError;
 use rodio::{Decoder, OutputStream, Sink, Source};
@@ -167,6 +169,29 @@ impl<S: Source> Source for CountingSource<S> {
     fn try_seek(&mut self, pos: Duration) -> Result<(), SeekError> {
         self.inner.try_seek(pos)
     }
+}
+
+/// Fisher-Yates gives every queue entry one slot per round. On a new round,
+/// avoid_first prevents the track just played from starting again immediately.
+fn shuffled_order<R: Rng + ?Sized>(
+    n: usize,
+    first: Option<usize>,
+    avoid_first: Option<usize>,
+    rng: &mut R,
+) -> Vec<usize> {
+    let mut idx: Vec<usize> = (0..n).collect();
+    if n > 1 {
+        idx.shuffle(rng);
+        if let Some(f) = first.filter(|&f| f < n) {
+            idx.retain(|&i| i != f);
+            idx.insert(0, f);
+        } else if let Some(avoid) = avoid_first {
+            if idx.first() == Some(&avoid) {
+                idx.swap(0, 1);
+            }
+        }
+    }
+    idx
 }
 
 struct Engine {
@@ -399,16 +424,18 @@ impl Engine {
     // ---------- queue ----------
 
     fn build_order(&mut self, first: Option<usize>) {
-        let n = self.queue.len();
-        let mut idx: Vec<usize> = (0..n).collect();
-        if self.mode == PlayMode::Shuffle && n > 1 {
-            idx.shuffle(&mut rand::thread_rng());
-            if let Some(f) = first {
-                idx.retain(|&i| i != f);
-                idx.insert(0, f);
-            }
-        }
-        self.order = idx;
+        self.order = if self.mode == PlayMode::Shuffle {
+            shuffled_order(self.queue.len(), first, None, &mut rand::thread_rng())
+        } else {
+            (0..self.queue.len()).collect()
+        };
+    }
+
+    /// Reshuffle only at a round boundary, preserving history within a round.
+    fn wrap_shuffle(&mut self) -> bool {
+        let last = self.order.last().copied();
+        self.order = shuffled_order(self.queue.len(), None, last, &mut rand::thread_rng());
+        !self.order.is_empty()
     }
 
     fn play_at(&mut self, opos: usize) {
@@ -463,7 +490,11 @@ impl Engine {
         if self.pos + 1 < self.order.len() {
             let p = self.pos + 1;
             self.play_at(p);
-        } else if self.mode != PlayMode::Order && !self.order.is_empty() {
+        } else if self.mode == PlayMode::Shuffle {
+            if self.wrap_shuffle() {
+                self.play_at(0);
+            }
+        } else if self.mode == PlayMode::LoopAll && !self.order.is_empty() {
             self.play_at(0);
         } else {
             self.stop_at_end();
@@ -477,7 +508,11 @@ impl Engine {
         if self.pos + 1 < self.order.len() {
             let p = self.pos + 1;
             self.play_at(p);
-        } else if self.mode != PlayMode::Order {
+        } else if self.mode == PlayMode::Shuffle {
+            if self.wrap_shuffle() {
+                self.play_at(0);
+            }
+        } else if self.mode == PlayMode::LoopAll {
             self.play_at(0);
         } else {
             self.stop_at_end();
@@ -501,7 +536,12 @@ impl Engine {
         if self.pos > 0 {
             let p = self.pos - 1;
             self.play_at(p);
-        } else if self.mode != PlayMode::Order {
+        } else if self.mode == PlayMode::Shuffle {
+            if self.wrap_shuffle() {
+                let p = self.order.len() - 1;
+                self.play_at(p);
+            }
+        } else if self.mode == PlayMode::LoopAll {
             let p = self.order.len() - 1;
             self.play_at(p);
         } else {
@@ -673,6 +713,7 @@ impl Engine {
             [id],
             |r| {
                 let path: String = r.get(0)?;
+                let (bit_depth, sample_rate) = Self::audio_quality(Path::new(&path));
                 let cover: Option<String> = r.get(5)?;
                 let blur = cover.as_deref().map(|c| {
                     crate::images::blur_of(Path::new(c))
@@ -688,6 +729,8 @@ impl Engine {
                         artist: r.get(2)?,
                         album: r.get(3)?,
                         duration: r.get(4)?,
+                        bit_depth,
+                        sample_rate,
                         cover_version: cover
                             .as_deref()
                             .and_then(|p| crate::images::file_version(Path::new(p))),
@@ -702,6 +745,19 @@ impl Engine {
             },
         )
         .ok()
+    }
+
+    fn audio_quality(path: &Path) -> (Option<u8>, Option<u32>) {
+        lofty::read_from_path(path)
+            .ok()
+            .map(|file| {
+                let properties = file.properties();
+                (
+                    properties.bit_depth().filter(|&bits| bits > 0),
+                    properties.sample_rate().filter(|&rate| rate > 0),
+                )
+            })
+            .unwrap_or((None, None))
     }
 
     // ---------- command handling ----------
@@ -811,4 +867,71 @@ fn normalized_album_key(conn: &Connection, track_id: i64) -> Option<String> {
         |r| r.get::<_, String>(0),
     )
     .ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rand::rngs::StdRng;
+    use rand::SeedableRng;
+    use std::collections::HashSet;
+
+    fn assert_permutation(order: &[usize], n: usize) {
+        let unique: HashSet<usize> = order.iter().copied().collect();
+        assert_eq!(unique, (0..n).collect());
+    }
+
+    #[test]
+    fn shuffle_keeps_the_requested_track_first() {
+        let mut rng = StdRng::seed_from_u64(11);
+        let order = shuffled_order(20, Some(7), None, &mut rng);
+        assert_eq!(order[0], 7);
+        assert_permutation(&order, 20);
+    }
+
+    #[test]
+    fn shuffle_reshuffles_each_round_without_repeating_the_boundary_track() {
+        let mut rng = StdRng::seed_from_u64(23);
+        let mut previous = shuffled_order(20, Some(0), None, &mut rng);
+        let mut rounds = HashSet::new();
+        rounds.insert(previous.clone());
+        for _ in 0..100 {
+            let last = previous.last().copied();
+            let next = shuffled_order(20, None, last, &mut rng);
+            assert_permutation(&next, 20);
+            assert_ne!(next[0], last.unwrap());
+            previous = next;
+            rounds.insert(previous.clone());
+        }
+        assert!(rounds.len() > 1, "every round used the same permutation");
+    }
+
+    #[test]
+    fn shuffle_handles_empty_single_and_two_track_queues() {
+        let mut rng = StdRng::seed_from_u64(37);
+        assert!(shuffled_order(0, None, None, &mut rng).is_empty());
+        assert_eq!(shuffled_order(1, None, Some(0), &mut rng), vec![0]);
+        let order = shuffled_order(2, None, Some(1), &mut rng);
+        assert_eq!(order, vec![0, 1]);
+        let order = shuffled_order(2, None, Some(0), &mut rng);
+        assert_eq!(order, vec![1, 0]);
+    }
+
+    #[test]
+    fn reads_real_audio_quality_and_ignores_unreadable_files() {
+        let path = std::env::temp_dir().join(format!("sonora-quality-{}.wav", std::process::id()));
+        let mut bytes = Vec::from(*b"RIFF\x28\x00\x00\x00WAVEfmt ");
+        bytes.extend_from_slice(&16_u32.to_le_bytes());
+        bytes.extend_from_slice(&1_u16.to_le_bytes());
+        bytes.extend_from_slice(&2_u16.to_le_bytes());
+        bytes.extend_from_slice(&48000_u32.to_le_bytes());
+        bytes.extend_from_slice(&288000_u32.to_le_bytes());
+        bytes.extend_from_slice(&6_u16.to_le_bytes());
+        bytes.extend_from_slice(&24_u16.to_le_bytes());
+        bytes.extend_from_slice(b"data\x04\x00\x00\x00\x00\x00\x00\x00");
+        std::fs::write(&path, bytes).unwrap();
+        assert_eq!(Engine::audio_quality(&path), (Some(24), Some(48000)));
+        let _ = std::fs::remove_file(&path);
+        assert_eq!(Engine::audio_quality(&path), (None, None));
+    }
 }

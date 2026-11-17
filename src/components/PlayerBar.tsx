@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../api";
+import { formatAudioQuality } from "./audioQuality";
 import { coverUrl } from "./coverUrl";
 import { fmtTime, MODE_LABEL, useLibrary, usePlayer } from "../store";
 import {
@@ -98,6 +99,7 @@ export default function PlayerBar() {
   const track = tick?.track ?? null;
   const mode = tick?.mode ?? "order";
   const volume = tick?.volume ?? 0.8;
+  const quality = track ? formatAudioQuality(track) : "";
 
   return (
     <footer className="playerbar">
@@ -116,6 +118,7 @@ export default function PlayerBar() {
             <div className="pb-meta">
               <div className="pb-title">{track.title}</div>
               <div className="pb-artist">{track.artist}</div>
+              {quality && <div className="audio-quality">{quality}</div>}
             </div>
           </>
         ) : (

@@ -48,6 +48,10 @@ pub struct PlayerTrackDto {
     pub artist: String,
     pub album: String,
     pub duration: f64,
+    /// Source-file bits per sample; lossy formats may not define one.
+    pub bit_depth: Option<u8>,
+    /// Source-file sample rate in Hz (not the output device's rate).
+    pub sample_rate: Option<u32>,
     pub cover: Option<String>,
     pub blur: Option<String>,
     /// File versions are separate from filesystem paths (asset URL cache bust).

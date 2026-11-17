@@ -44,6 +44,9 @@ export interface PlayerTrackDto {
   artist: string;
   album: string;
   duration: number;
+  /** Source-file properties; lossy formats may have no fixed bit depth. */
+  bit_depth: number | null;
+  sample_rate: number | null;
   cover: string | null;
   blur: string | null;
   cover_version?: string | null;

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
 import TrackEditDialog from "../components/TrackEditDialog";
+import { formatAudioQuality } from "../components/audioQuality";
 import { coverUrl } from "../components/coverUrl";
 import { useInterpolatedPosition } from "../components/PlayerBar";
 import { fmtTime, useLibrary, usePlayer } from "../store";
@@ -154,6 +155,7 @@ export default function NowPlayingView() {
   const tick = usePlayer((s) => s.tick);
   const track = tick?.track ?? null;
   const blurUrl = coverUrl(track?.blur ?? null, track?.blur_version);
+  const quality = track ? formatAudioQuality(track) : "";
   const [editing, setEditing] = useState<EditableTrack | null>(null);
 
   return (
@@ -172,6 +174,7 @@ export default function NowPlayingView() {
             <div className="np-title">{track?.title ?? "未在播放"}</div>
             <div className="np-artist">{track?.artist ?? ""}</div>
             <div className="np-album">{track?.album ?? ""}</div>
+            {quality && <div className="audio-quality">{quality}</div>}
             {track && (
               <button
                 className="ghost-btn np-edit"
